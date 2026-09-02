@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -e
+set -euo pipefail
 
 # Ensure script is run as root
 if [ "$EUID" -ne 0 ]; then
@@ -15,8 +15,8 @@ if [ "$REAL_USER" = "root" ]; then
   exit 1
 fi
 
-REAL_HOME=$(eval echo "~$REAL_USER")
-DOTFILES_BASE_URL="${DOTFILES_BASE_URL:-https://raw.githubusercontent.com/sadako-yamamura/arch-setup/dotfiles}"
+REAL_HOME=$(getent passwd "$REAL_USER" | cut -d: -f6)
+DOTFILES_BASE_URL="${DOTFILES_BASE_URL:-https://raw.githubusercontent.com/sadako-yamamura/arch-setup/main/dotfiles}"
 
 echo "==> Updating system package databases..."
 pacman -Sy --noconfirm
@@ -55,15 +55,18 @@ pacman -Sy --noconfirm
 # 3. Arkenfox
 echo "==> Installing Arkenfox user.js for $REAL_USER..."
 sudo -u "$REAL_USER" env HOME="$REAL_HOME" bash -c '
-  set -e
+  set -euo pipefail
 
   FIREFOX_PROFILE_ROOT="$HOME/.mozilla/firefox"
-  PROFILE_DIR=$(find "$FIREFOX_PROFILE_ROOT" -mindepth 1 -maxdepth 1 \
-    -type d -name "*.default*" -print -quit 2>/dev/null || true)
+  mkdir -p "$FIREFOX_PROFILE_ROOT"
+
+  # Prefer an existing profile with a prefs.js file, including custom names.
+  PROFILE_DIR=$(find "$FIREFOX_PROFILE_ROOT" -mindepth 2 -maxdepth 2 \
+    -type f -name prefs.js -printf "%h\n" -quit 2>/dev/null || true)
 
   # Create Firefox’s default profile if this is a fresh installation.
   if [ -z "$PROFILE_DIR" ]; then
-    firefox --headless -CreateProfile default >/dev/null 2>&1 || true
+    firefox --headless --no-remote -CreateProfile default >/dev/null 2>&1 || true
     PROFILE_DIR=$(find "$FIREFOX_PROFILE_ROOT" -mindepth 1 -maxdepth 1 \
       -type d -name "*.default*" -print -quit 2>/dev/null || true)
   fi
@@ -91,28 +94,36 @@ chsh -s "$ZSH_PATH" "$REAL_USER"
 
 echo "==> Configuring tmux to start Zsh..."
 sudo -u "$REAL_USER" env HOME="$REAL_HOME" bash -c '
+  set -euo pipefail
+  ZSH_PATH="'"$ZSH_PATH"'"
   TMUX_CONFIG="$HOME/.tmux.conf"
   touch "$TMUX_CONFIG"
 
-  grep -Fqx "set -g default-shell /bin/zsh" "$TMUX_CONFIG" || \
-    echo "set -g default-shell /bin/zsh" >> "$TMUX_CONFIG"
-  grep -Fqx "set -g default-command \"/bin/zsh -l\"" "$TMUX_CONFIG" || \
-    echo "set -g default-command \"/bin/zsh -l\"" >> "$TMUX_CONFIG"
+  grep -Fqx "set -g default-shell $ZSH_PATH" "$TMUX_CONFIG" || \
+    echo "set -g default-shell $ZSH_PATH" >> "$TMUX_CONFIG"
+  grep -Fqx "set -g default-command \"$ZSH_PATH -l\"" "$TMUX_CONFIG" || \
+    echo "set -g default-command \"$ZSH_PATH -l\"" >> "$TMUX_CONFIG"
 '
 
 # 5. Kitty
 echo "==> Configuring Kitty theme for $REAL_USER..."
-sudo -u "$REAL_USER" bash -c "
-  mkdir -p '$REAL_HOME/.config/kitty'
-  KITTY_CONFIG='$REAL_HOME/.config/kitty/kitty.conf'
-  grep -Fqx 'font_family FiraCode Nerd Font' \"\$KITTY_CONFIG\" || \\
-    echo 'font_family FiraCode Nerd Font' >> \"\$KITTY_CONFIG\"
-  kitty +kitten themes --reload-in=all Catppuccin-Mocha
-"
+sudo -u "$REAL_USER" env HOME="$REAL_HOME" ZSH_PATH="$ZSH_PATH" bash -c '
+  set -euo pipefail
+  mkdir -p "$HOME/.config/kitty"
+  KITTY_CONFIG="$HOME/.config/kitty/kitty.conf"
+  touch "$KITTY_CONFIG"
+  grep -Fqx "font_family FiraCode Nerd Font" "$KITTY_CONFIG" || \
+    echo "font_family FiraCode Nerd Font" >> "$KITTY_CONFIG"
+  grep -Fqx "shell $ZSH_PATH --login" "$KITTY_CONFIG" || \
+    echo "shell $ZSH_PATH --login" >> "$KITTY_CONFIG"
+
+  kitty +kitten themes --reload-in=all Catppuccin-Mocha >/dev/null 2>&1 || \
+    echo "Warning: Kitty theme will be applied when Kitty is running."
+'
 
 echo "==> Installing public dotfiles for $REAL_USER..."
 sudo -u "$REAL_USER" env HOME="$REAL_HOME" DOTFILES_BASE_URL="$DOTFILES_BASE_URL" bash -c '
-  set -e
+  set -euo pipefail
 
   DOTFILES_TMP=$(mktemp -d)
   trap "rm -rf \"$DOTFILES_TMP\"" EXIT
@@ -134,7 +145,6 @@ sudo -u "$REAL_USER" env HOME="$REAL_HOME" DOTFILES_BASE_URL="$DOTFILES_BASE_URL
 
   fetch_config ".zshrc" "$HOME/.zshrc"
   fetch_config ".config/starship.toml" "$HOME/.config/starship.toml"
-  fetch_config ".mozilla/firefox/user.js" "$HOME/.mozilla/firefox/user.js"
 '
 
 echo "==> Setup finished successfully!"
