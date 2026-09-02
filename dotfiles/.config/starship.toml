@@ -1,0 +1,94 @@
+# Lightweight Catppuccin pastel Powerline prompt.
+# Only the modules listed in `format` are rendered.
+palette = "catppuccin_mocha"
+add_newline = false
+scan_timeout = 0
+command_timeout = 0
+
+format = """
+[](surface0)[$username@$hostname](fg:text bg:surface0)[](fg:surface0 bg:blue)[ $directory ](fg:crust bg:blue)[](fg:blue bg:green)[ $character ](fg:crust bg:green)[](fg:green)
+"""
+
+[username]
+show_always = true
+
+[hostname]
+ssh_only = false
+
+[directory]
+truncation_length = 3
+truncate_to_repo = false
+
+[character]
+success_symbol = "❯"
+error_symbol = "❯"
+vimcmd_symbol = "❮"
+
+# Explicitly disable modules that scan repositories, inspect packages, or run
+# timing commands.
+[cmd_duration]
+disabled = true
+
+[time]
+disabled = true
+
+[git_branch]
+disabled = true
+
+[git_status]
+disabled = true
+
+[package]
+disabled = true
+
+[python]
+disabled = true
+
+[nodejs]
+disabled = true
+
+[rust]
+disabled = true
+
+[golang]
+disabled = true
+
+[java]
+disabled = true
+
+[c]
+disabled = true
+
+[docker_context]
+disabled = true
+
+[kubernetes]
+disabled = true
+
+[aws]
+disabled = true
+
+[azure]
+disabled = true
+
+[gcloud]
+disabled = true
+
+[palettes.catppuccin_mocha]
+rosewater = "#f5e0e6"
+flamingo = "#f2cdcd"
+pink = "#f5c2e7"
+mauve = "#cba6f7"
+red = "#f38ba8"
+maroon = "#eba0ac"
+peach = "#fab387"
+yellow = "#f9e2af"
+green = "#a6e3a1"
+teal = "#94e2d5"
+sky = "#89dceb"
+sapphire = "#74c7ec"
+blue = "#89b4fa"
+lavender = "#b4befe"
+text = "#cdd6f4"
+crust = "#11111b"
+surface0 = "#313244"
