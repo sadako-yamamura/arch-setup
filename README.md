@@ -82,11 +82,11 @@ Inside the live USB installer, get the script and execute it
 
 For Arch
 ```
-curl -L https://raw.githubusercontent.com/sadako-yamamura/arch/refs/heads/main/arch_script.sh -o installer.sh
+curl -L https://raw.githubusercontent.com/sadako-yamamura/arch-setup/refs/heads/main/arch_script.sh -o installer.sh
 ```
 For Artix
 ```
-curl -L https://raw.githubusercontent.com/sadako-yamamura/arch/refs/heads/main/artix_dinit.sh -o installer.sh
+curl -L https://raw.githubusercontent.com/sadako-yamamura/arch-setup/refs/heads/main/artix_dinit.sh -o installer.sh
 ```
 Then
 ```
@@ -110,7 +110,7 @@ Last tested on: <br>
 ```console
 # Arch
 $ cat /proc/version
-Linux version 7.0.3-arch1-1 (linux@archlinux) (gcc (GCC) 15.2.1 20260209, GNU ld (GNU Binutils) 2.46) #1 SMP PREEMPT_DYNAMIC Thu, 30 Apr 2026 18:41:12 +0000
+Linux version 7.1.9-arch1-2 (linux@archlinux) (gcc (GCC) 16.2.1 20260810, GNU ld (GNU Binutils) 2.47) #1 SMP PREEMPT_DYNAMIC Fri, 21 Aug 2026 22:18:59 +0000
 # Artix
 $ cat /proc/version
 Linux version 7.0.10-artix1-1 (linux@artixlinux) (gcc (GCC) 16.1.1 20260430, GNU ld (GNU Binutils) 2.46.0) #1 SMP PREEMPT_DYNAMIC Sat, 23 May 2026 18:01:41 +0000

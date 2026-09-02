@@ -16,7 +16,7 @@ if [ "$REAL_USER" = "root" ]; then
 fi
 
 REAL_HOME=$(eval echo "~$REAL_USER")
-DOTFILES_BASE_URL="${DOTFILES_BASE_URL:-https://raw.githubusercontent.com/sadako-yamamura/arch/zsh/dotfiles}"
+DOTFILES_BASE_URL="${DOTFILES_BASE_URL:-https://raw.githubusercontent.com/sadako-yamamura/arch-setup/dotfiles}"
 
 echo "==> Updating system package databases..."
 pacman -Sy --noconfirm
